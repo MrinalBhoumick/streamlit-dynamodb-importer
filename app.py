@@ -4,7 +4,10 @@ import boto3
 import io
 
 # Constants
-ROLE_ARN = "arn:aws:iam::207567766326:role/Workmates-SSO-L2SupportRole"
+ROLE_ARNS = {
+    "CWM Q": "arn:aws:iam::207567766326:role/Workmates-SSO-L2SupportRole",
+    "Cert-In": "arn:aws:iam::412381762776:role/Workmates-SSO-L2SupportRole"
+}
 REGION = "ap-south-1"
 
 TABLE_SCHEMAS = {
@@ -20,9 +23,8 @@ TABLE_SCHEMAS = {
         "TeamName": str,
         "TeamsURL": str
     }
-}
+} 
 
-# Define primary key for each table for duplicate detection
 PRIMARY_KEYS = {
     "CWM-Account-Details-Table": "AccountId",
     "CWM-Team-Details-Table": "TeamName"
@@ -125,7 +127,10 @@ def main():
 
     Simply upload your Excel file, validate the data, and upload clean entries to DynamoDB with confidence.
     """)
-
+    # Account selection
+    account_choice = st.selectbox("Choose AWS Account", list(ROLE_ARNS.keys()))
+    role_arn = ROLE_ARNS[account_choice]
+    
     table_choice = st.selectbox("Choose DynamoDB Table", list(TABLE_SCHEMAS.keys()))
     schema = TABLE_SCHEMAS[table_choice]
     primary_key = PRIMARY_KEYS[table_choice]
@@ -149,7 +154,7 @@ def main():
                     return
 
                 with st.spinner("Checking for duplicates in DynamoDB..."):
-                    session = assume_role_session(ROLE_ARN)
+                    session = assume_role_session(role_arn)
                     existing_keys = get_existing_keys(session, table_choice, primary_key)
 
                     new_items = []
