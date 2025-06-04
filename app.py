@@ -15,6 +15,7 @@ TABLE_SCHEMAS = {
         "AccountId": str,
         "AccountName": str,
         "CustomerEmailIds": str,
+        "Regions": str,
         "TeamEmailIds": str,
         "TeamId": str,
         "TeamName": str
@@ -23,7 +24,7 @@ TABLE_SCHEMAS = {
         "TeamName": str,
         "TeamsURL": str
     }
-} 
+}
 
 PRIMARY_KEYS = {
     "CWM-Account-Details-Table": "AccountId",
@@ -65,10 +66,11 @@ def validate_and_prepare_data(df, schema, table_name):
             if expected_type == str and not isinstance(value, str):
                 value = str(value)
 
-            if expected_type == str and col == "TeamEmailIds":
-                value = [email.strip() for email in str(value).split(",") if email.strip()]
-                if not all(isinstance(email, str) for email in value):
-                    errors.append(f"Row {i+2}: Invalid emails in 'TeamEmailIds'")
+            if expected_type == str and col in ["TeamEmailIds", "Regions"]:
+                value = [entry.strip() for entry in str(value).split(",") if entry.strip()]
+                if not all(isinstance(entry, str) for entry in value):
+                    errors.append(f"Row {i+2}: Invalid entries in '{col}'")
+                    continue
 
             item[col] = value
 
