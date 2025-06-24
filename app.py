@@ -63,22 +63,32 @@ def validate_and_prepare_data(df, schema, table_name):
 
             value = row[col]
 
+            # Coerce to string if needed
             if expected_type == str and not isinstance(value, str):
                 value = str(value)
 
-            if expected_type == str and col in ["TeamEmailIds", "Regions"]:
-                value = [entry.strip() for entry in str(value).split(",") if entry.strip()]
-                if not all(isinstance(entry, str) for entry in value):
-                    errors.append(f"Row {i+2}: Invalid entries in '{col}'")
-                    continue
+            # Custom handling
+            if col == "Regions":
+                # Store as a comma-separated string (string type)
+                entries = [entry.strip() for entry in value.split(",") if entry.strip()]
+                value = ",".join(entries)
+                item[col] = value
 
-            item[col] = value
+            elif col == "TeamEmailIds":
+                # Store as a string set
+                entries = {entry.strip() for entry in value.split(",") if entry.strip()}
+                if not entries:
+                    errors.append(f"Row {i+2}: 'TeamEmailIds' must contain at least one valid email.")
+                    continue
+                item[col] = entries
+
+            else:
+                item[col] = value
 
         if len(item) == len(schema):
             cleaned_items.append(item)
 
     return cleaned_items, errors
-
 
 def get_existing_keys(session, table_name, key_name):
     """Fetch all existing primary key values from the table."""
