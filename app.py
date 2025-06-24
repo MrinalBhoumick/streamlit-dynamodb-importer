@@ -5,6 +5,7 @@ import io
 
 # Constants
 ROLE_ARNS = {
+    "Workmates-Automation": "arn:aws:iam::036160411876:role/Workmates-SSO-L2SupportRole",
     "CWM Q": "arn:aws:iam::207567766326:role/Workmates-SSO-L2SupportRole",
     "Cert-In": "arn:aws:iam::412381762776:role/Workmates-SSO-L2SupportRole"
 }
@@ -17,7 +18,6 @@ TABLE_SCHEMAS = {
         "CustomerEmailIds": str,
         "Regions": str,
         "TeamEmailIds": str,
-        "TeamId": str,
         "TeamName": str
     },
     "CWM-Team-Details-Table": {
