@@ -23,12 +23,16 @@ TABLE_SCHEMAS = {
     "CWM-Team-Details-Table": {
         "TeamName": str,
         "TeamsURL": str
+    },
+    "CWM-Account-Restriction-Table": {
+        "AccountId": str
     }
 }
 
 PRIMARY_KEYS = {
     "CWM-Account-Details-Table": "AccountId",
-    "CWM-Team-Details-Table": "TeamName"
+    "CWM-Team-Details-Table": "TeamName",
+    "CWM-Account-Restriction-Table": "AccountId"
 }
 
 
@@ -63,19 +67,15 @@ def validate_and_prepare_data(df, schema, table_name):
 
             value = row[col]
 
-            # Coerce to string if needed
             if expected_type == str and not isinstance(value, str):
                 value = str(value)
 
-            # Custom handling
             if col == "Regions":
-                # Store as a comma-separated string (string type)
                 entries = [entry.strip() for entry in value.split(",") if entry.strip()]
                 value = ",".join(entries)
                 item[col] = value
 
             elif col == "TeamEmailIds":
-                # Store as a string set
                 entries = {entry.strip() for entry in value.split(",") if entry.strip()}
                 if not entries:
                     errors.append(f"Row {i+2}: 'TeamEmailIds' must contain at least one valid email.")
@@ -89,6 +89,7 @@ def validate_and_prepare_data(df, schema, table_name):
             cleaned_items.append(item)
 
     return cleaned_items, errors
+
 
 def get_existing_keys(session, table_name, key_name):
     """Fetch all existing primary key values from the table."""
@@ -139,7 +140,7 @@ def main():
 
     Simply upload your Excel file, validate the data, and upload clean entries to DynamoDB with confidence.
     """)
-    # Account selection
+
     account_choice = st.selectbox("Choose AWS Account", list(ROLE_ARNS.keys()))
     role_arn = ROLE_ARNS[account_choice]
     
